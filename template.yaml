@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Glue Week2"
+Resources:
+  RoleCrawler:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "*"
+                Resource: "*"
+  MyDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: "dbcrawler"
+        Description: "TestDatabaseDescription"
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "crawlertarget"
+  MyCrawler2:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: "crawler"
+      Role: !GetAtt RoleCrawler.Arn
+      DatabaseName: !Ref MyDatabase
+      Targets:
+        S3Targets:
+          - Path: !Ref S3Bucket
+      Classifiers:
+        - !Ref CrawlerClassifier
+  CrawlerClassifier:
+    Type: AWS::Glue::Classifier
+    Properties:
+      CsvClassifier:
+        Name: "CrawlerClassifier"
+        Delimiter: ','
