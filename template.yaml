@@ -29,11 +29,12 @@ Resources:
       DatabaseInput:
         Name: "dbcrawler"
         Description: "TestDatabaseDescription"
+        LocationUri: "s3://crawlertarget/csv/"
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: "crawlertarget"
-  MyCrawler2:
+  MyCrawler:
     Type: AWS::Glue::Crawler
     Properties:
       Name: "crawler"
@@ -42,11 +43,5 @@ Resources:
       Targets:
         S3Targets:
           - Path: !Ref S3Bucket
-      Classifiers:
-        - !Ref CrawlerClassifier
-  CrawlerClassifier:
-    Type: AWS::Glue::Classifier
-    Properties:
-      CsvClassifier:
-        Name: "CrawlerClassifier"
-        Delimiter: ','
+      SchemaChangePolicy:
+        UpdateBehavior: "UPDATE_IN_DATABASE"
