@@ -9,6 +9,7 @@ try:
 except ClientError:
     print("Data Bucket Already Created")
 u.upload_object('data-suddu', 'template.yaml', 'template.yaml')
+u.upload_object('data-suddu', 'job.py', 'job_scripts/job.py')
 client = boto3.client('cloudformation')
 status = u.status_stack('week2')
 if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED':
@@ -33,4 +34,6 @@ print("stack created")
 if status == 'CREATE_COMPLETE' or status == 'UPDATE_COMPLETE':
     u.upload_object('crawlertarget', 'Sample Data/sample1.csv', 'csv/sample1.csv')
     u.upload_object('crawlertarget', 'Sample Data/sample2.csv', 'csv/sample2.csv')
-    u.upload_object('crawlertarget', 'Sample Data/sample3.csv', 'csv/sample3.csv')
+client_glue = boto3.client('glue')
+client_glue.start_job_run(
+    JobName='cf-job',)

@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "Glue Week2"
 Resources:
-  RoleCrawler:
+  roleglue:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -38,10 +38,21 @@ Resources:
     Type: AWS::Glue::Crawler
     Properties:
       Name: "crawler"
-      Role: !GetAtt RoleCrawler.Arn
+      Role: !GetAtt roleglue.Arn
       DatabaseName: !Ref MyDatabase
       Targets:
         S3Targets:
           - Path: !Ref S3Bucket
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
+  MyJob:
+    Type: AWS::Glue::Job
+    Properties:
+      AllocatedCapacity: 2
+      Command:
+        Name: glueetl
+        ScriptLocation: "s3://data-suddu/job_scripts/job.py"
+      ExecutionProperty:
+        MaxConcurrentRuns: 2
+      Name: cf-job
+      Role: !GetAtt roleglue.Arn
