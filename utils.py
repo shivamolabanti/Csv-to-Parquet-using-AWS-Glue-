@@ -3,6 +3,7 @@ import zipfile, os
 
 client = boto3.client('cloudformation')
 s3 = boto3.resource('s3')
+client_glue = boto3.client('glue')
 
 
 def create_stack(stack_name, template_url):
@@ -15,6 +16,7 @@ def create_stack(stack_name, template_url):
 
 def update_stack(stack_name, template_url):
     try:
+        print("updating stack")
         response = client.update_stack(
             StackName=stack_name,
             TemplateURL=template_url,
@@ -53,3 +55,7 @@ def upload_zip_object(bucket_name, input_filename, output_filename, location):
     upload_object(bucket_name, output_filename, location)
     os.remove(output_filename)
 
+
+def crawler_status(crawler_name):
+    response = client_glue.get_crawler(Name=crawler_name)
+    return response['Crawler']['State']

@@ -12,9 +12,10 @@ u.upload_object('data-suddu', 'template.yaml', 'template.yaml')
 u.upload_object('data-suddu', 'job.py', 'job_scripts/job.py')
 client = boto3.client('cloudformation')
 status = u.status_stack('week2')
-if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED':
-    u.delete_object('CrawlerTarget')
+if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED' or status == 'UPDATE_ROLLBACK_COMPLETE' or status == 'DELETE_FAILED':
+    u.delete_object('crawlertarget')
     client.delete_stack(StackName='week2')
+    print("deleting stack")
     while u.status_stack('week2') == 'DELETE_IN_PROGRESS':
         time.sleep(1)
     print("stack deleted")
@@ -22,7 +23,6 @@ if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED':
     print("creating stack")
 elif status == 'CREATE_COMPLETE' or status == 'UPDATE_COMPLETE':
     u.update_stack('week2', 'https://data-suddu.s3.ap-south-1.amazonaws.com/template.yaml')
-    print("updating stack")
 else:
     u.create_stack('week2', 'https://data-suddu.s3.ap-south-1.amazonaws.com/template.yaml')
     print("creating stack")
@@ -35,5 +35,9 @@ if status == 'CREATE_COMPLETE' or status == 'UPDATE_COMPLETE':
     u.upload_object('crawlertarget', 'Sample Data/sample1.csv', 'csv/sample1.csv')
     u.upload_object('crawlertarget', 'Sample Data/sample2.csv', 'csv/sample2.csv')
 client_glue = boto3.client('glue')
-client_glue.start_job_run(
-    JobName='cf-job',)
+#client_glue.start_crawler(Name='crawler')
+print("crawler started")
+while u.crawler_status('crawler') != 'READY':
+    time.sleep(1)
+print("job started")
+client_glue.start_job_run(JobName='cf-job')

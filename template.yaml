@@ -28,8 +28,6 @@ Resources:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
         Name: "dbcrawler"
-        Description: "TestDatabaseDescription"
-        LocationUri: "s3://crawlertarget/csv/"
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -42,7 +40,7 @@ Resources:
       DatabaseName: !Ref MyDatabase
       Targets:
         S3Targets:
-          - Path: !Ref S3Bucket
+          - Path: "s3://crawlertarget/csv/"
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
   MyJob:
@@ -52,7 +50,10 @@ Resources:
       Command:
         Name: glueetl
         ScriptLocation: "s3://data-suddu/job_scripts/job.py"
+        PythonVersion: '3'
       ExecutionProperty:
         MaxConcurrentRuns: 2
       Name: cf-job
       Role: !GetAtt roleglue.Arn
+      DefaultArguments:
+        "--job-bookmark-option": "job-bookmark-disable"
