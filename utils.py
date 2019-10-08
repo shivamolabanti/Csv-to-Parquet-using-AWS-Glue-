@@ -59,3 +59,7 @@ def upload_zip_object(bucket_name, input_filename, output_filename, location):
 def crawler_status(crawler_name):
     response = client_glue.get_crawler(Name=crawler_name)
     return response['Crawler']['State']
+
+def job_status(job_name,run_id):
+    response = client_glue.get_job_run(JobName=job_name, RunId=run_id)
+    return response['JobRun']['JobRunState']

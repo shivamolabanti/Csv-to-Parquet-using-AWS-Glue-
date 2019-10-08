@@ -22,7 +22,7 @@ Resources:
               - Effect: "Allow"
                 Action: "*"
                 Resource: "*"
-  MyDatabase:
+  Database:
     Type: AWS::Glue::Database
     Properties:
       CatalogId: !Ref AWS::AccountId
@@ -32,15 +32,27 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: "crawlertarget"
-  MyCrawler:
+  Crawler:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: "crawler"
+      Name: "CSVCrawler"
       Role: !GetAtt roleglue.Arn
-      DatabaseName: !Ref MyDatabase
+      DatabaseName: !Ref Database
       Targets:
         S3Targets:
-          - Path: "s3://crawlertarget/csv/"
+          - Path: "s3://crawlertarget/csv/sample1.csv"
+          - Path: "s3://crawlertarget/csv/sample2.csv"
+      SchemaChangePolicy:
+        UpdateBehavior: "UPDATE_IN_DATABASE"
+  CrawlerParquet:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: "ParquetCrawler"
+      Role: !GetAtt roleglue.Arn
+      DatabaseName: !Ref Database
+      Targets:
+        S3Targets:
+          - Path: "s3://crawlertarget/job-output/"
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
   MyJob:
@@ -53,7 +65,7 @@ Resources:
         PythonVersion: '3'
       ExecutionProperty:
         MaxConcurrentRuns: 2
-      Name: cf-job
+      Name: job
       Role: !GetAtt roleglue.Arn
       DefaultArguments:
         "--job-bookmark-option": "job-bookmark-disable"

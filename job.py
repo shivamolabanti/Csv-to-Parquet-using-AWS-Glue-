@@ -20,5 +20,5 @@ final_df = sample1_df.union(sample2_df).distinct()
 final = DynamicFrame.fromDF(final_df, glueContext, "final_df")
 glueContext.write_dynamic_frame.from_options(frame=final,
                                              connection_type="s3",
-                                             connection_options={"path": "s3://data-suddu/job-output"},
+                                             connection_options={"path": "s3://crawlertarget/job-output"},
                                              format="parquet")

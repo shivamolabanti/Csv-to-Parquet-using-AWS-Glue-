@@ -1,6 +1,5 @@
 import boto3
 from botocore.client import ClientError
-import zipfile,os
 import time
 import utils as u
 s3 = boto3.resource('s3')
@@ -12,7 +11,8 @@ u.upload_object('data-suddu', 'template.yaml', 'template.yaml')
 u.upload_object('data-suddu', 'job.py', 'job_scripts/job.py')
 client = boto3.client('cloudformation')
 status = u.status_stack('week2')
-if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED' or status == 'UPDATE_ROLLBACK_COMPLETE' or status == 'DELETE_FAILED':
+if status == 'ROLLBACK_COMPLETE' or status == 'ROLLBACK_FAILED' or status == 'UPDATE_ROLLBACK_COMPLETE' or status == \
+        'DELETE_FAILED':
     u.delete_object('crawlertarget')
     client.delete_stack(StackName='week2')
     print("deleting stack")
@@ -35,9 +35,28 @@ if status == 'CREATE_COMPLETE' or status == 'UPDATE_COMPLETE':
     u.upload_object('crawlertarget', 'Sample Data/sample1.csv', 'csv/sample1.csv')
     u.upload_object('crawlertarget', 'Sample Data/sample2.csv', 'csv/sample2.csv')
 client_glue = boto3.client('glue')
-#client_glue.start_crawler(Name='crawler')
-print("crawler started")
-while u.crawler_status('crawler') != 'READY':
-    time.sleep(1)
+client_glue.start_crawler(Name='CSVCrawler')
+print("csv crawler started")
+while u.crawler_status('CSVCrawler') != 'READY':
+    time.sleep(2)
 print("job started")
-client_glue.start_job_run(JobName='cf-job')
+
+#delteing all object from output folder
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('crawlertarget')
+bucket.objects.filter(Prefix="job-output/").delete()
+
+response = client_glue.start_job_run(JobName='job')
+while u.job_status('job', response['JobRunId']) == 'STARTING' or u.job_status('job', response['JobRunId']) == \
+        'RUNNING' or u.job_status('job', response['JobRunId']) == 'STOPPING':
+    time.sleep(2)
+if u.job_status('job', response['JobRunId']) == 'FAILED':
+    print("job failed")
+    exit()
+print("job completed")
+client_glue.start_crawler(Name='ParquetCrawler')
+print("parquet crawler started")
+while u.crawler_status('ParquetCrawler') != 'READY':
+    time.sleep(2)
+print("crawler completed")
+print("table created with parquet file")
