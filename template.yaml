@@ -15,13 +15,26 @@ Resources:
               - "sts:AssumeRole"
       Path: "/"
       Policies:
-        - PolicyName: "root"
+        - PolicyName: S3Policyglue
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
-              - Effect: "Allow"
-                Action: "*"
-                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: "arn:aws:s3:::crawlertarget/*"
+              - Effect: Allow
+                Action:
+                  - s3:List*
+                Resource: "arn:aws:s3:::crawlertarget"
+              - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                    - glue:Get*
+                    - glue:CreateTable
+                  Resource: "*"
   Database:
     Type: AWS::Glue::Database
     Properties:
