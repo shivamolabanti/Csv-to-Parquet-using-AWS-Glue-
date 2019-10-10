@@ -79,5 +79,3 @@ Resources:
         MaxConcurrentRuns: 2
       Name: job
       Role: !GetAtt roleglue.Arn
-      DefaultArguments:
-        "--job-bookmark-option": "job-bookmark-disable"
