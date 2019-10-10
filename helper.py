@@ -34,13 +34,13 @@ print("stack created")
 if status == 'CREATE_COMPLETE' or status == 'UPDATE_COMPLETE':
     u.upload_object('crawlertarget', 'Sample Data/sample1.csv', 'csv/sample1.csv')
     u.upload_object('crawlertarget', 'Sample Data/sample2.csv', 'csv/sample2.csv')
+    u.upload_object('crawlertarget', 'Sample Data/new1.csv', 'csv/new1.csv')
 client_glue = boto3.client('glue')
 client_glue.start_crawler(Name='CSVCrawler')
 print("csv crawler started")
 while u.crawler_status('CSVCrawler') != 'READY':
     time.sleep(2)
 print("job started")
-
 #delteing all object from output folder
 s3 = boto3.resource('s3')
 bucket = s3.Bucket('crawlertarget')

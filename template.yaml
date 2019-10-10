@@ -40,8 +40,7 @@ Resources:
       DatabaseName: !Ref Database
       Targets:
         S3Targets:
-          - Path: "s3://crawlertarget/csv/sample1.csv"
-          - Path: "s3://crawlertarget/csv/sample2.csv"
+          - Path: "s3://crawlertarget/csv/"
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
   CrawlerParquet:
