@@ -1,5 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "Glue Week2"
+Parameters:
+  DataBaseName:
+    Type: String
+  BucketName:
+    Type: String
+  CrawlerName:
+    Type: String
+  JobName:
+    Type: String
+  DataBucket:
+    Type: String
 Resources:
   roleglue:
     Type: AWS::IAM::Role
@@ -24,58 +35,45 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                   - s3:DeleteObject
-                Resource: "arn:aws:s3:::crawlertarget/*"
-              - Effect: Allow
-                Action:
-                  - s3:List*
-                Resource: "arn:aws:s3:::crawlertarget"
-              - Effect: Allow
-                  Action:
-                    - logs:PutLogEvents
-                    - glue:Get*
-                    - glue:CreateTable
-                  Resource: "*"
+                  - s3:*
+                  - logs:PutLogEvents
+                  - logs:*
+                  - glue:Get*
+                  - glue:CreateTable
+                Resource: "*"
   Database:
     Type: AWS::Glue::Database
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
-        Name: "dbcrawler"
+        Name: !Ref DataBaseName
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: "crawlertarget"
+      BucketName: !Ref BucketName
   Crawler:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: "CSVCrawler"
+      Name: !Ref CrawlerName
       Role: !GetAtt roleglue.Arn
       DatabaseName: !Ref Database
       Targets:
         S3Targets:
-          - Path: "s3://crawlertarget/csv/"
+          - Path: !Sub s3://${BucketName}/job-output/
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
-  CrawlerParquet:
-    Type: AWS::Glue::Crawler
-    Properties:
-      Name: "ParquetCrawler"
-      Role: !GetAtt roleglue.Arn
-      DatabaseName: !Ref Database
-      Targets:
-        S3Targets:
-          - Path: "s3://crawlertarget/job-output/"
-      SchemaChangePolicy:
-        UpdateBehavior: "UPDATE_IN_DATABASE"
-  MyJob:
+  job:
     Type: AWS::Glue::Job
     Properties:
       AllocatedCapacity: 2
       Command:
         Name: glueetl
-        ScriptLocation: "s3://data-suddu/job_scripts/job.py"
+        ScriptLocation: !Sub s3://${DataBucket}/job_scripts/job.py
         PythonVersion: '3'
       ExecutionProperty:
         MaxConcurrentRuns: 2
-      Name: job
+      Name: !Ref JobName
       Role: !GetAtt roleglue.Arn
+      GlueVersion: 1.0
+      DefaultArguments:
+        '--TempDir': !Sub s3://${BucketName}/
