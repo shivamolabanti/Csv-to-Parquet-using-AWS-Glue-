@@ -2,18 +2,16 @@ import os
 import zipfile
 import boto3
 
-client = boto3.client('cloudformation')
-s3 = boto3.resource('s3')
-client_glue = boto3.client('glue')
+s3 = boto3.client('s3', region_name='ap-south-1')
 
 
 def upload_object(bucket_name, filename, location):
-    s3.Object(bucket_name, location).upload_file(Filename=filename)
+    s3.upload_file(filename, bucket_name, location)
 
 
 def upload_file_folder(bucket_name, folder_name):
     for file in os.listdir(folder_name):
-        s3.Object(bucket_name, file).upload_file(Filename=folder_name + '/' + file)
+        s3.upload_file(folder_name + '/' + file, bucket_name, file)
 
 
 def upload_zip_object(bucket_name, input_filename, output_filename, location):
