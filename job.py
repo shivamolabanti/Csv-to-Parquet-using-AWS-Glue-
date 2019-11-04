@@ -6,6 +6,8 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 
 
+# converts csv file to spark data frame
+
 def csv_to_dataframe(location):
     lines = sc.textFile(location)
     rdd = lines.map(lambda line: line.split(','))

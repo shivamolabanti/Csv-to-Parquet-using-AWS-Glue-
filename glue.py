@@ -1,14 +1,14 @@
 import boto3
 import time
 
-s3 = boto3.resource('s3')
 client_glue = boto3.client('glue')
 
 
 class Glue:
-    def __init__(self, job_name, crawler_name):
+    def __init__(self, job_name, crawler_name, region):
         self.job_name = job_name
         self.crawler_name = crawler_name
+        self.client_glue = boto3.client('glue',  region_name=region)
 
     def start_job(self):
         response = client_glue.start_job_run(JobName=self.job_name)
@@ -23,7 +23,6 @@ class Glue:
         print("job completed")
 
     def start_crawler(self):
-        print("crawler started")
         client_glue.start_crawler(Name=self.crawler_name)
         print("parquet crawler started")
         while self.crawler_status() != 'READY':
