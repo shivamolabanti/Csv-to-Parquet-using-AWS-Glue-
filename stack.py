@@ -42,9 +42,10 @@ class Stack:
             time.sleep(2)
         if self.status_stack() == 'CREATE_COMPLETE' or self.status_stack() == 'UPDATE_COMPLETE':
             print("stack created")
+            return 0
         else:
             print("stack creation failed")
-            exit()
+            return 1
 
     def create_stack(self):
         try:
@@ -77,7 +78,6 @@ class Stack:
             )
         except ClientError as ce:
             print(ce)
-            exit()
 
     def update_stack(self):
         try:
@@ -113,7 +113,6 @@ class Stack:
                 print("Stack Already Updated")
             else:
                 print(ce)
-                exit()
 
     def status_stack(self):
         try:
@@ -125,7 +124,6 @@ class Stack:
                 print("No stack present")
             else:
                 print(ce)
-                exit()
 
     def delete_object(self):
         try:
@@ -137,4 +135,3 @@ class Stack:
                 print(ce)
             else:
                 print(ce)
-                exit()
