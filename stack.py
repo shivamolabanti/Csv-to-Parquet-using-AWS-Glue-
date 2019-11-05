@@ -15,6 +15,7 @@ class Stack:
         self.crawler_name = crawler_name
         self.job_name = job_name
         self.data_bucket = data_bucket
+
     # if stack is in rollback stage then stack get deleted and then it gets created.
     # if stack is in create stage then it gets updated
 
