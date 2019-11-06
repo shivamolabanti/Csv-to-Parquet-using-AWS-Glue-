@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "Glue Week2"
+
 Parameters:
   DataBaseName:
     Type: String
@@ -11,6 +12,7 @@ Parameters:
     Type: String
   DataBucket:
     Type: String
+
 Resources:
   roleglue:
     Type: AWS::IAM::Role
@@ -37,16 +39,19 @@ Resources:
                   - glue:*
                   - s3:*
                 Resource: "*"
+
   Database:
     Type: AWS::Glue::Database
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
         Name: !Ref DataBaseName
+
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BucketName
+
   Crawler:
     Type: AWS::Glue::Crawler
     Properties:
@@ -58,6 +63,7 @@ Resources:
           - Path: !Sub s3://${BucketName}/job-output/
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
+
   job:
     Type: AWS::Glue::Job
     Properties:
@@ -71,5 +77,3 @@ Resources:
       Name: !Ref JobName
       Role: !GetAtt roleglue.Arn
       GlueVersion: 1.0
-      DefaultArguments:
-        '--TempDir': !Sub s3://${BucketName}/
